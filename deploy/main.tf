@@ -10,3 +10,13 @@ module "messaging" {
   bucket_id   = module.storage.bucket_id
   bucket_arn  = module.storage.bucket_arn
 }
+
+module "database" {
+  source      = "./modules/database"
+  environment = var.environment
+  vpc_id      = var.vpc_id
+  db_name     = var.db_name
+  db_username = var.db_username
+  db_password = var.db_password
+  instance_class = var.instance_class
+}
