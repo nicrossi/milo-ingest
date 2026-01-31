@@ -37,3 +37,11 @@ variable "subnet_ids" {
 variable "security_group_id" {
     type = string
 }
+
+variable "doppler_secrets" {
+    description = "Map of secrets from Doppler"
+    type        = map(string)
+    default     = {}
+    sensitive   = true
+}
+

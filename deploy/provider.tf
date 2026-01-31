@@ -34,3 +34,9 @@ provider "aws" {
     }
   }
 }
+
+provider "doppler" {
+  # Authentication is handled via DOPPLER_TOKEN environment variable
+  # Set this before running terraform: export DOPPLER_TOKEN="your-service-token"
+}
+

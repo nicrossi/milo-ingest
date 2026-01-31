@@ -9,6 +9,12 @@ data "aws_subnets" "default" {
   }
 }
 
+# Fetch secrets from Doppler during apply phase
+data "doppler_secrets" "this" {
+  project = var.doppler_project
+  config  = coalesce(var.doppler_config, var.environment)
+}
+
 module "storage" {
   source      = "./modules/storage"
   bucket_name = "milo-raw-ingest-${var.environment}"
@@ -51,4 +57,5 @@ module "ingest_service" {
   s3_bucket_id       = module.storage.bucket_id
   subnet_ids         = data.aws_subnets.default.ids
   security_group_id  = module.database.db_security_group_id # Shared for PoC
+  doppler_secrets    = data.doppler_secrets.this.map
 }

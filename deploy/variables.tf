@@ -27,6 +27,18 @@ variable "env_vars" {
   default     = {}
 }
 
+variable "doppler_project" {
+  description = "Doppler project name"
+  type        = string
+  default     = "milo-ingest"
+}
+
+variable "doppler_config" {
+  description = "Doppler config name (e.g., dev, staging, prd)"
+  type        = string
+  default     = null
+}
+
 # RDS module
 variable "db_name" {
     type = string

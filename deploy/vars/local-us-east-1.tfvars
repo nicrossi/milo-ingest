@@ -4,7 +4,10 @@ aws_profile      = "localstack"
 aws_local_url    = "http://localhost:4566"
 
 # Resource Settings for Local Testing
-db_name          = "milo_dev"
-db_username      = "milo_admin"
-db_password      = "password123"
+db_name          = "DB_NAME"
+db_username      = "DB_USERNAME"
+db_password      = "DB_PASSWORD"
 instance_class   = "db.t3.micro"
+
+doppler_project = "milo-ingest"
+doppler_config  = "dev"

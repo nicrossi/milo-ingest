@@ -27,12 +27,15 @@ resource "aws_ecs_task_definition" "ingest" {
       image     = var.container_image
       essential = true
 
-      environment = [
-        { name = "DB_URL",        value = var.db_url },
-        { name = "SQS_QUEUE_URL", value = var.sq_queue_url },
-        { name = "S3_BUCKET",     value = var.s3_bucket_id },
-        { name = "ENV",           value = var.environment }
-      ]
+      environment = concat(
+        [
+          { name = "DB_URL",        value = var.db_url },
+          { name = "SQS_QUEUE_URL", value = var.sq_queue_url },
+          { name = "S3_BUCKET",     value = var.s3_bucket_id },
+          { name = "ENV",           value = var.environment }
+        ],
+        [for key, value in var.doppler_secrets : { name = key, value = value }]
+      )
 
       logConfiguration = {
         logDriver = "awslogs"
