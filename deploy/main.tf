@@ -20,3 +20,10 @@ module "database" {
   db_password = var.db_password
   instance_class = var.instance_class
 }
+
+module "iam" {
+  source      = "./modules/iam"
+  environment = var.environment
+  bucket_arn  = module.storage.bucket_arn
+  queue_arn   = module.messaging.queue_arn
+}
