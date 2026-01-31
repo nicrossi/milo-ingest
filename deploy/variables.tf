@@ -40,3 +40,10 @@ variable "db_password" {
   type      = string
   sensitive = true
 }
+
+variable "instance_class" {
+  description = "RDS instance class"
+  type        = string
+  default     = "db.t3.micro"
+}
+
