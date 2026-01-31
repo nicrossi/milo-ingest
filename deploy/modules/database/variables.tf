@@ -15,16 +15,16 @@ variable "db_username" {
 }
 
 variable "db_password" {
-    type = string;
+    type = string
     sensitive = true
 }
 
 variable "instance_class" {
-    type = string;
+    type = string
     default = "db.t3.micro"
 }
 
 variable "app_security_group_id" {
-    type = string;
+    type = string
     default = null
 }
