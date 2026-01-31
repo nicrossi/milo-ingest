@@ -11,17 +11,9 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_versioning_v2" "this" {
+resource "aws_s3_bucket_versioning" "this" {
   bucket = aws_s3_bucket.this.id
   versioning_configuration {
     status = "Enabled"
   }
-}
-
-output "bucket_arn" {
-  value = aws_s3_bucket.this.arn
-}
-
-output "bucket_id" {
-  value = aws_s3_bucket.this.id
 }
