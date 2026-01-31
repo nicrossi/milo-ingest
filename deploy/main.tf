@@ -27,3 +27,17 @@ module "iam" {
   bucket_arn  = module.storage.bucket_arn
   queue_arn   = module.messaging.queue_arn
 }
+
+module "ingest_service" {
+  source             = "./modules/ecs-service"
+  environment        = var.environment
+  aws_region         = var.aws_region
+  container_image    = "milo/doclin:latest"
+  execution_role_arn = module.iam.execution_role_arn
+  task_role_arn      = module.iam.task_role_arn
+  db_url             = module.database.db_endpoint
+  sq_queue_url       = module.messaging.queue_url
+  s3_bucket_id       = module.storage.bucket_id
+  subnet_ids         = [var.subnet_id]
+  security_group_id  = module.database.db_security_group_id # Shared for PoC
+}
