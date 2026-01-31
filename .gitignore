@@ -1,0 +1,16 @@
+.terraform/
+
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+
+crash.log
+*.log
+
+.env
+.envrc
+
+*.tfplan
+
+.DS_Store
+Thumbs.db
