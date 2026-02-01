@@ -2,3 +2,7 @@ boto3==1.35.97
 psycopg2-binary==2.9.9
 pgvector==0.2.4
 python-dotenv==1.0.1
+docling==2.15.1
+# Force CPU version to save space (Docling relies on Torch)
+torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cpu
