@@ -7,7 +7,7 @@ resource "aws_security_group" "this" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    # when not in local, only allow access from the Doclin ECS Service SG
+    # when not in local, only allow access from the Docling ECS Service SG
     cidr_blocks     = var.environment == "local" ? ["0.0.0.0/0"] : []
     security_groups = var.app_security_group_id != null ? [var.app_security_group_id] : []
   }

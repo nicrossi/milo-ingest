@@ -82,7 +82,7 @@ doppler run --project milo-ingest --config dev -- python main.py
 ```
 Expected Output:
 ```
-2026-01-31 10:30:15,123 - doclin-ack - INFO - Worker started. Listening on: http://localhost:4566/000000000000/milo-ingest-local
+2026-01-31 10:30:15,123 - docling-ack - INFO - Worker started. Listening on: http://localhost:4566/000000000000/milo-ingest-local
 ```
 The worker is now polling the SQS queue every 20 seconds (long polling enabled).
 

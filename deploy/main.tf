@@ -49,7 +49,7 @@ module "ingest_service" {
   source             = "./modules/ecs"
   environment        = var.environment
   aws_region         = var.aws_region
-  container_image    = "milo/doclin:latest"
+  container_image    = "milo/ingest:latest"
   execution_role_arn = module.iam.execution_role_arn
   task_role_arn      = module.iam.task_role_arn
   db_url             = module.database.db_endpoint
