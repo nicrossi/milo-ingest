@@ -9,6 +9,7 @@ crash.log
 
 .env
 .envrc
+.venv
 
 *.tfplan
 
