@@ -1,5 +1,7 @@
 # Milo Ingest Pipeline
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 > Event-driven S3-to-SQS ingestion pipeline with AWS infrastructure provisioned via Terraform
 
 ## Overview
