@@ -1,20 +1,18 @@
-version: '3.8'
-
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: milo-db-local
+    container_name: ${POSTGRES_CONTAINER_NAME}
     environment:
-      POSTGRES_USER: milo-admin
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: milo_dev
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U milo-admin -d milo_dev"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
