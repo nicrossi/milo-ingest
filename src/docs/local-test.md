@@ -22,6 +22,30 @@ Comprehensive guide to testing the document ingestion pipeline locally with two 
 
 ---
 
+## Critical Configuration: Embedding Model & Vector Dimension
+
+**⚠️ IMPORTANT:** The embedding model and vector dimension MUST match exactly across both the Ingest and RAG repositories. Mismatched values will result in incompatible vectors.
+
+### Required Doppler Variables (dev config)
+
+Configure these in Doppler for consistent behavior:
+
+```bash
+  doppler secrets set EMBEDDING_MODEL="sentence-transformers/all-MiniLM-L6-v2" --project milo-ingest --config dev
+  doppler secrets set VECTOR_DIMENSION="384" --project milo-ingest --config dev
+```
+
+**Why this matters:**
+- **EMBEDDING_MODEL**: Determines how text is converted to vectors. Both ingest and RAG must use identical models.
+- **VECTOR_DIMENSION**: The database column is defined as `vector(384)`. This must match the model's output dimension.
+
+> **Note:** If you change the embedding model, you must:
+> 1. Update both `EMBEDDING_MODEL` and `VECTOR_DIMENSION` in Doppler
+> 2. Drop and recreate the `document_embeddings` table with the new dimension
+> 3. Re-process all documents to generate new embeddings
+
+---
+
 ## Prerequisites
 
 ### Required Tools
@@ -83,15 +107,17 @@ export QUEUE_URL=$(tflocal output -raw queue_url)
 echo "Queue URL: $QUEUE_URL"
 ```
 
-Update the Doppler `dev` config with the queue URL:
+Update the Doppler `dev` config with the queue URL and embedding configuration:
 ```
 doppler secrets set SQS_QUEUE_URL="$QUEUE_URL" --project milo-ingest --config dev
+doppler secrets set EMBEDDING_MODEL="sentence-transformers/all-MiniLM-L6-v2" --project milo-ingest --config dev
+doppler secrets set VECTOR_DIMENSION="384" --project milo-ingest --config dev
 ```
 
 > **Note:** To programmatically set secrets (write access), you must explicitly 
 > generate a Service Token with R/W access.
 
-Verify `SQS_QUEUE_URL` is configured:
+Verify all secrets are configured:
 ```
 doppler secrets --project milo-ingest --config dev
 ```
@@ -214,7 +240,7 @@ Launch the PostgreSQL database with pgvector extension:
 
 ### 3) Configure Environment Variables
 
-The integration test requires database connection details. Set them via `.env` file:
+The integration test requires database connection details and embedding configuration. Set them via `.env` file:
 
 Create a `.env` file in the project root:
 
@@ -224,6 +250,8 @@ POSTGRES_USER=milo_user
 POSTGRES_PASSWORD=milo_password
 POSTGRES_DB=milo_db
 POSTGRES_CONTAINER_NAME=milo-postgres-dev
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+VECTOR_DIMENSION=384
 EOF
 ```
 

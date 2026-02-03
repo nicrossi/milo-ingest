@@ -1,12 +1,16 @@
 import logging
+import os
 from typing import List, Tuple
 from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 
 class ContentEmbedder:
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, model_name: str = None):
+        if model_name is None:
+            model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
         self.model = SentenceTransformer(model_name)
+        logger.info(f"Initialized embedder with model: {model_name}")
 
     def chunk_text(self, text: str, chunk_size: int = 1000) -> List[str]:
         """Simple semantic splitter based on double newlines (paragraphs)."""

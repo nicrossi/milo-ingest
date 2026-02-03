@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import contextmanager
 from typing import List, Generator
 
@@ -11,6 +12,8 @@ logger = logging.getLogger(__name__)
 class VectorStore:
     def __init__(self, db_url: str, min_conn: int = 1, max_conn: int = 10):
         self._pool = ThreadedConnectionPool(min_conn, max_conn, db_url)
+        self.vector_dimension = int(os.getenv("VECTOR_DIMENSION", "384"))
+        logger.info(f"Initialized vector store with dimension: {self.vector_dimension}")
         self._init_schema()
 
     @contextmanager
@@ -31,7 +34,7 @@ class VectorStore:
     def _init_schema(self):
         """Ensures the pgvector extension and table exist."""
         # We keep this here for self-contained worker resilience.
-        ddl = """
+        ddl = f"""
         CREATE EXTENSION IF NOT EXISTS vector;
 
         CREATE TABLE IF NOT EXISTS document_embeddings (
@@ -39,7 +42,7 @@ class VectorStore:
             source_file TEXT NOT NULL,
             chunk_index INT NOT NULL,
             chunk_text TEXT NOT NULL,
-            embedding vector(384),
+            embedding vector({self.vector_dimension}),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
