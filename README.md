@@ -4,7 +4,7 @@
 
 ## Overview
 
-The **Milo Ingest Pipeline** is a serverless data ingestion system that automatically processes files uploaded to S3. 
+The **Milo Ingest Pipeline** is a data ingestion system that automatically processes files uploaded to S3. 
 When a file is uploaded, S3 triggers an event notification to SQS, and a Python consumer worker processes the messages in real-time.
 
 ## Architecture
