@@ -1,5 +1,5 @@
-# ECS Task Execution Role:
-# Used by the Fargate agent (to pull images and send logs).
+# ECS EC2 Instance Role:
+# Used by the EC2 container instance to register with the ECS cluster and pull images.
 resource "aws_iam_role" "execution_role" {
   name = "milo-ingest-execution-role-${var.environment}"
 
@@ -8,14 +8,19 @@ resource "aws_iam_role" "execution_role" {
     Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
-      Principal = { Service = "ecs-tasks.amazonaws.com" }
+      Principal = { Service = "ec2.amazonaws.com" }
     }]
   })
 }
 
 resource "aws_iam_role_policy_attachment" "execution_role_policy" {
   role       = aws_iam_role.execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_logs_policy" {
+  role       = aws_iam_role.execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
 
 # ECS Task Role:
@@ -57,3 +62,4 @@ resource "aws_iam_role_policy" "task_permissions" {
     ]
   })
 }
+

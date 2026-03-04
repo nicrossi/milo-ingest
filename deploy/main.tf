@@ -46,16 +46,18 @@ module "iam" {
 }
 
 module "ingest_service" {
-  source             = "./modules/ecs"
-  environment        = var.environment
-  aws_region         = var.aws_region
-  container_image    = "milo/ingest:latest"
-  execution_role_arn = module.iam.execution_role_arn
-  task_role_arn      = module.iam.task_role_arn
-  db_url             = module.database.db_endpoint
-  sq_queue_url       = module.messaging.queue_url
-  s3_bucket_id       = module.storage.bucket_id
-  subnet_ids         = data.aws_subnets.default.ids
-  security_group_id  = module.database.db_security_group_id # Shared for PoC
-  doppler_secrets    = data.doppler_secrets.this.map
+  source                 = "./modules/ecs"
+  environment            = var.environment
+  aws_region             = var.aws_region
+  vpc_id                 = data.aws_vpc.default.id
+  subnet_ids             = data.aws_subnets.default.ids
+  db_security_group_id   = module.database.db_security_group_id
+  ec2_instance_role_name = module.iam.ec2_instance_role_name
+  container_image        = "milo/ingest:latest"
+  execution_role_arn     = module.iam.execution_role_arn
+  task_role_arn          = module.iam.task_role_arn
+  db_url                 = module.database.db_endpoint
+  sq_queue_url           = module.messaging.queue_url
+  s3_bucket_id           = module.storage.bucket_id
+  doppler_secrets        = data.doppler_secrets.this.map
 }
