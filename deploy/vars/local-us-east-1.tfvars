@@ -7,7 +7,7 @@ aws_local_url    = "http://localhost:4566"
 db_name          = "DB_NAME"
 db_username      = "DB_USERNAME"
 db_password      = "DB_PASSWORD"
-instance_class   = "db.t3.micro"
+instance_class   = "db.t2.micro"
 
 doppler_project = "milo-ingest"
 doppler_config  = "dev"

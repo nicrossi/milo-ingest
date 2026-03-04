@@ -21,7 +21,7 @@ variable "db_password" {
 
 variable "instance_class" {
     type = string
-    default = "db.t3.micro"
+    default = "db.t2.micro"
 }
 
 variable "app_security_group_id" {
