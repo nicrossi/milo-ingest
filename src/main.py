@@ -26,7 +26,10 @@ ENV = os.getenv("ENV", "local")
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL") if ENV == "local" else None
 SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL")
-DB_URL = os.getenv("DB_URL")
+DB_NAME = os.getenv("DB_NAME")
+DB_USERNAME = os.getenv("DB_USERNAME")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_URL = os.getenv("DB_URL") if ENV != "local" else f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@localhost:5433/{DB_NAME}"
 
 if not SQS_QUEUE_URL or not DB_URL:
     raise ValueError("Missing required environment variables: SQS_QUEUE_URL or DB_URL")
