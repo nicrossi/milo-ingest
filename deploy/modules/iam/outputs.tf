@@ -7,7 +7,7 @@ output "execution_role_name" {
 }
 
 output "ec2_instance_role_name" {
-  value = aws_iam_role.execution_role.name
+  value = aws_iam_role.ec2_instance_role.name
 }
 
 output "task_role_arn" {

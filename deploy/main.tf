@@ -71,7 +71,7 @@ module "ingest_service" {
   db_security_group_id   = module.database.db_security_group_id
   ec2_instance_role_name = module.iam.ec2_instance_role_name
   ec2_instance_type      = var.ec2_instance_type
-  container_image        = "milo/ingest:latest"
+  container_image        = "nicrossi/milo-ingest:latest"
   execution_role_arn     = module.iam.execution_role_arn
   task_role_arn          = module.iam.task_role_arn
   db_url                 = module.database.db_endpoint

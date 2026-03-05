@@ -1,7 +1,7 @@
 # ECS EC2 Instance Role:
 # Used by the EC2 container instance to register with the ECS cluster and pull images.
-resource "aws_iam_role" "execution_role" {
-  name = "milo-ingest-execution-role-${var.environment}"
+resource "aws_iam_role" "ec2_instance_role" {
+  name = "milo-ingest-ec2-instance-role-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -13,9 +13,29 @@ resource "aws_iam_role" "execution_role" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "ec2_instance_role_policy" {
+  role       = aws_iam_role.ec2_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+# ECS Task Execution Role:
+# Used by ECS to pull container images and write logs on behalf of the task.
+resource "aws_iam_role" "execution_role" {
+  name = "milo-ingest-execution-role-${var.environment}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = { Service = "ecs-tasks.amazonaws.com" }
+    }]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "execution_role_policy" {
   role       = aws_iam_role.execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "cloudwatch_logs_policy" {
