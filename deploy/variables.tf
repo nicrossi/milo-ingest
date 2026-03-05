@@ -39,20 +39,7 @@ variable "doppler_config" {
   default     = null
 }
 
-# RDS module
-variable "db_name" {
-    type = string
-}
-
-variable "db_username" {
-    type = string
-}
-
-variable "db_password" {
-  type      = string
-  sensitive = true
-}
-
+# RDS instance class only — db_name, db_username, db_password are sourced from Doppler
 variable "instance_class" {
   description = "RDS instance class"
   type        = string
