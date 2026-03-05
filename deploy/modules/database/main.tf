@@ -23,7 +23,7 @@ resource "aws_db_parameter_group" "this" {
 resource "aws_db_instance" "this" {
   identifier           = "milo-db-${var.environment}"
   engine               = "postgres"
-  engine_version       = "16.1"
+  engine_version       = "16.3"
   instance_class       = var.instance_class
   allocated_storage    = 20
   db_name              = var.db_name

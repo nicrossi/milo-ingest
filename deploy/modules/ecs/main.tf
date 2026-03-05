@@ -29,7 +29,7 @@ resource "aws_iam_instance_profile" "ecs_ec2" {
 resource "aws_launch_template" "ecs_ec2" {
   name_prefix   = "milo-ingest-ecs-ec2-${var.environment}-"
   image_id      = data.aws_ami.ecs_optimized.id
-  instance_type = "t2.micro"
+  instance_type = var.ec2_instance_type
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ecs_ec2.name

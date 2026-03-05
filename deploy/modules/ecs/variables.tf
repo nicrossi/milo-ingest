@@ -49,6 +49,12 @@ variable "s3_bucket_id" {
     type = string
 }
 
+variable "ec2_instance_type" {
+  description = "EC2 instance type for the ECS container instance"
+  type        = string
+  default     = "t3.micro"
+}
+
 variable "doppler_secrets" {
     description = "Map of secrets from Doppler"
     type        = map(string)
