@@ -30,6 +30,7 @@ DB_NAME = os.getenv("DB_NAME")
 DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_URL = os.getenv("DB_URL") if ENV != "local" else f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@localhost:5433/{DB_NAME}"
+HEALTH_FILE = "/tmp/worker.ready"
 
 if not SQS_QUEUE_URL or not DB_URL:
     raise ValueError("Missing required environment variables: SQS_QUEUE_URL or DB_URL")
@@ -44,6 +45,10 @@ vector_store = VectorStore(DB_URL)
 def shutdown_handler(signum, frame):
     logger.info("Shutdown signal received. Closing resources.")
     vector_store.close()
+    try:
+        Path(HEALTH_FILE).unlink(missing_ok=True)
+    except OSError:
+        pass
     sys.exit(0)
 
 signal.signal(signal.SIGINT, shutdown_handler)
@@ -87,6 +92,14 @@ def process_message(message):
 
 def poll_queue():
     logger.info(f"Worker started. Listening on: {SQS_QUEUE_URL}")
+
+    # Signal to the ECS health check that the worker is ready
+    try:
+        with open(HEALTH_FILE, "w") as f:
+            f.write("ready")
+        logger.info(f"Health sentinel written to {HEALTH_FILE}")
+    except OSError as e:
+        logger.warning(f"Could not write health sentinel: {e}")
 
     while True:
         try:
