@@ -94,6 +94,13 @@ Test individual components without external dependencies:
 
 For a local test, follow the **[Local Test Guide](src/docs/local-test.md)**:
 
+### Quick local setup (recommended)
+
+Use the Windows runbook for exact terminal-by-terminal commands:
+
+- [Local Runbook (Windows)](docs/LOCAL_RUNBOOK_WINDOWS.md)
+
+
 ---
 
 ## Deployment
@@ -111,3 +118,4 @@ Set up your Doppler project and generate a service token. See **[Doppler Setup G
 - **Docker Compose**: https://docs.docker.com/compose/
 - **LocalStack**: https://docs.localstack.cloud/
 - **Doppler Secrets**: https://docs.doppler.com/
+
