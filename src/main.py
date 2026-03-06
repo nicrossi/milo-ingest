@@ -29,7 +29,11 @@ SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL")
 DB_NAME = os.getenv("DB_NAME")
 DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_URL = os.getenv("DB_URL") if ENV != "local" else f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@localhost:5433/{DB_NAME}"
+DB_URL = os.getenv("DB_URL") or (
+    None if ENV != "local"
+    else f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@localhost:5433/{DB_NAME}"
+)
+
 HEALTH_FILE = "/tmp/worker.ready"
 
 if not SQS_QUEUE_URL or not DB_URL:

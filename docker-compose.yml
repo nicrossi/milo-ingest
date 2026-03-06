@@ -16,6 +16,61 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  localstack:
+    image: localstack/localstack:3.0
+    container_name: milo-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3,sqs
+      DEBUG: 1
+      DATA_DIR: /tmp/localstack/data
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - "${TMPDIR:-/tmp}/localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD", "awslocal", "s3", "ls"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  upload-gateway:
+    build: .
+    container_name: milo-upload-gateway
+    ports:
+      - "8010:8010"
+    environment:
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/milo-ingest-local
+      - DB_URL=postgresql://milo-admin:password@postgres:5432/milo_dev
+      - INGEST_BUCKET=milo-raw-ingest-local
+      - UPLOAD_GATEWAY_HOST=0.0.0.0
+      - UPLOAD_GATEWAY_PORT=8010
+    depends_on:
+      localstack:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: ["python", "src/upload_gateway.py"]
 
+  worker:
+    build: .
+    container_name: milo-worker
+    environment:
+      - ENV=local
+      - AWS_REGION=us-east-1
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/milo-ingest-local
+      - DB_NAME=milo_dev
+      - DB_USERNAME=milo-admin
+      - DB_PASSWORD=password
+      - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+      - VECTOR_DIMENSION=384
+    depends_on:
+      localstack:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: ["python", "src/main.py"]
 volumes:
   postgres_data:
