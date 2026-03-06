@@ -179,13 +179,18 @@ resource "aws_ecs_service" "this" {
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.ingest.arn
   desired_count   = 1
-  launch_type     = "EC2"
+
+  # Use the capacity provider instead of launch_type so the ASG
+  # is responsible for launching the EC2 container instance.
+  capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.ec2.name
+    weight            = 100
+  }
 
   # pull the ':latest' image even if the tag name hasn't changed
-  #force_new_deployment = var.environment == "local"
   force_new_deployment = true
 
-  # Prevents Terraform from fighting with AS in higher envs
+  # Prevents Terraform from fighting with ASG in higher envs
   lifecycle {
     ignore_changes = [desired_count]
   }
