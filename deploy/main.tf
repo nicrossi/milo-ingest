@@ -62,6 +62,23 @@ resource "null_resource" "doppler_db_url" {
   }
 }
 
+# Push the SQS_QUEUE_URL into Doppler after the queue is created
+resource "null_resource" "doppler_queue_url" {
+  depends_on = [module.messaging]
+
+  triggers = {
+    queue_url = module.messaging.queue_url
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      doppler secrets set SQS_QUEUE_URL="${module.messaging.queue_url}" \
+        --project ${var.doppler_project} \
+        --config ${coalesce(var.doppler_config, var.environment)}
+    EOT
+  }
+}
+
 module "ingest_service" {
   source                 = "./modules/ecs"
   environment            = var.environment

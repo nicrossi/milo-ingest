@@ -39,7 +39,7 @@ resource "aws_launch_template" "ecs_ec2" {
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
-    echo ECS_CLUSTER=${aws_ecs_cluster.this.name} >> /etc/ecs/ecs.config
+    echo ECS_CLUSTER=milo-ingest-ecs-cluster-${var.environment} >> /etc/ecs/ecs.config
   EOF
   )
 }
@@ -60,6 +60,41 @@ resource "aws_autoscaling_group" "ecs_ec2" {
     key                 = "AmazonECSManaged"
     value               = true
     propagate_at_launch = true
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Scale the ASG to 0 before destroying the cluster so container instances
+# are deregistered first (avoids ClusterContainsContainerInstancesException).
+resource "null_resource" "drain_ecs_instances" {
+  triggers = {
+    asg_name = aws_autoscaling_group.ecs_ec2.name
+    region   = var.aws_region
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      aws autoscaling update-auto-scaling-group \
+        --region "${self.triggers.region}" \
+        --auto-scaling-group-name "${self.triggers.asg_name}" \
+        --min-size 0 --max-size 0 --desired-capacity 0
+
+      echo "Waiting for instances to terminate..."
+      for i in $(seq 1 30); do
+        COUNT=$(aws autoscaling describe-auto-scaling-groups \
+          --region "${self.triggers.region}" \
+          --auto-scaling-group-names "${self.triggers.asg_name}" \
+          --query "AutoScalingGroups[0].Instances | length(@)" \
+          --output text)
+        echo "Instances remaining: $COUNT"
+        [ "$COUNT" = "0" ] && break
+        sleep 10
+      done
+    EOT
   }
 }
 
@@ -83,6 +118,8 @@ resource "aws_ecs_cluster" "this" {
     name  = "containerInsights"
     value = "enabled"
   }
+
+  depends_on = [null_resource.drain_ecs_instances]
 }
 
 resource "aws_ecs_cluster_capacity_providers" "this" {
@@ -112,8 +149,8 @@ resource "aws_ecs_task_definition" "ingest" {
       name      = "ingest"
       image     = var.container_image
       essential = true
-      cpu       = 256
-      memory    = 512
+      cpu       = 1024
+      memory    = 2048
 
       environment = concat(
         [
@@ -145,7 +182,8 @@ resource "aws_ecs_service" "this" {
   launch_type     = "EC2"
 
   # pull the ':latest' image even if the tag name hasn't changed
-  force_new_deployment = var.environment == "local"
+  #force_new_deployment = var.environment == "local"
+  force_new_deployment = true
 
   # Prevents Terraform from fighting with AS in higher envs
   lifecycle {
