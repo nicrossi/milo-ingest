@@ -6,17 +6,12 @@ variable "aws_region" {
     type = string
 }
 
-variable "vpc_id" {
-  description = "VPC ID for the EC2 security group"
-  type        = string
-}
-
 variable "subnet_ids" {
     type = list(string)
 }
 
-variable "db_security_group_id" {
-  description = "RDS security group ID so the EC2 container instance can reach the DB"
+variable "ec2_security_group_id" {
+  description = "Security group ID for the ECS EC2 container instance"
   type        = string
 }
 

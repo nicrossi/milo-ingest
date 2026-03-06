@@ -8,18 +8,7 @@ data "aws_ami" "ecs_optimized" {
   }
 }
 
-resource "aws_security_group" "ec2" {
-  name        = "milo-ingest-ec2-sg-${var.environment}"
-  description = "Allow outbound traffic from the ingest ECS EC2 instance"
-  vpc_id      = var.vpc_id
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
 
 resource "aws_iam_instance_profile" "ecs_ec2" {
   name = "milo-ingest-ecs-ec2-profile-${var.environment}"
@@ -35,7 +24,7 @@ resource "aws_launch_template" "ecs_ec2" {
     name = aws_iam_instance_profile.ecs_ec2.name
   }
 
-  vpc_security_group_ids = [aws_security_group.ec2.id, var.db_security_group_id]
+  vpc_security_group_ids = [var.ec2_security_group_id]
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
@@ -150,7 +139,7 @@ resource "aws_ecs_task_definition" "ingest" {
       image     = var.container_image
       essential = true
       cpu       = 1024
-      memory    = 2048
+      memory    = 1536
 
       environment = concat(
         [
