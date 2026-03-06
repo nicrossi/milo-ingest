@@ -101,21 +101,17 @@ queue_url = "http://localhost:4566/000000000000/milo-ingest-local"
 
 ### 3) Configure Doppler Secrets
 
-Extract the SQS queue URL from Terraform outputs:
-```
-export QUEUE_URL=$(tflocal output -raw queue_url)
-echo "Queue URL: $QUEUE_URL"
-```
+> **Note:** `SQS_QUEUE_URL` is automatically written to Doppler by Terraform via the
+> `null_resource.doppler_queue_url` provisioner after the queue is created — no manual
+> step required. To programmatically set secrets (write access), you must explicitly
+> generate a Service Token with R/W access.
 
-Update the Doppler `dev` config with the queue URL and embedding configuration:
+Set the embedding configuration in Doppler:
 ```
-doppler secrets set SQS_QUEUE_URL="$QUEUE_URL" --project milo-ingest --config dev
 doppler secrets set EMBEDDING_MODEL="sentence-transformers/all-MiniLM-L6-v2" --project milo-ingest --config dev
 doppler secrets set VECTOR_DIMENSION="384" --project milo-ingest --config dev
 ```
 
-> **Note:** To programmatically set secrets (write access), you must explicitly 
-> generate a Service Token with R/W access.
 
 Verify all secrets are configured:
 ```
