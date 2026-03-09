@@ -29,6 +29,7 @@ resource "aws_launch_template" "ecs_ec2" {
   user_data = base64encode(<<-EOF
     #!/bin/bash
     echo ECS_CLUSTER=milo-ingest-ecs-cluster-${var.environment} >> /etc/ecs/ecs.config
+    echo ECS_IMAGE_PULL_BEHAVIOR=always >> /etc/ecs/ecs.config
   EOF
   )
 }
