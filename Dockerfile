@@ -3,8 +3,18 @@ FROM python:3.11-slim-bookworm AS builder
 
 WORKDIR /app
 
+# Install minimal system deps needed at build time (and for some wheels)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
+    libxcb1 \
+    libx11-6 \
+    libxext6 \
+    libxrender1 \
+    libsm6 \
+    libxrandr2 \
+    libxinerama1 \
+    libxi6 \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 
@@ -16,8 +26,18 @@ FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
+# Install runtime system libs required by OpenCV/docling and friends
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
+    libxcb1 \
+    libx11-6 \
+    libxext6 \
+    libxrender1 \
+    libsm6 \
+    libxrandr2 \
+    libxinerama1 \
+    libxi6 \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /root/.local /root/.local
