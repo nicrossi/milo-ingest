@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List, Tuple
+from typing import List
 from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
@@ -10,7 +10,7 @@ class ContentEmbedder:
         if model_name is None:
             model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
         self.model = SentenceTransformer(model_name)
-        logger.info(f"Initialized embedder with model: {model_name}")
+        logger.info("Initialized embedder with model: %s", model_name)
 
     def chunk_text(self, text: str, chunk_size: int = 1000) -> List[str]:
         """Simple semantic splitter based on double newlines (paragraphs)."""
@@ -44,5 +44,7 @@ class ContentEmbedder:
             return []
 
         logger.info("Generating embeddings for %d chunks...", len(chunks))
-        embeddings = self.model.encode(chunks)
+
+        # Increase to 64 or 128 if deployed on an EC2 instance with a GPU.
+        embeddings = self.model.encode(chunks, batch_size=32, show_progress_bar=False)
         return embeddings.tolist()

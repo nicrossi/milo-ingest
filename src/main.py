@@ -63,9 +63,8 @@ def process_file(bucket: str, object_key: str):
         markdown = doc_parser.parse_to_markdown(local_path)
         chunks = embedder.chunk_text(markdown)
 
-        # we should handle this better
         if not chunks:
-            logger.warning(f"No text content found in {object_key}")
+            logger.warning("No text content found in %s", object_key)
             return
 
         vectors = embedder.embed_chunks(chunks)
@@ -74,32 +73,38 @@ def process_file(bucket: str, object_key: str):
         if local_path.exists():
             local_path.unlink()
 
-def process_message(message):
+def process_message(message: dict):
     body = json.loads(message["Body"])
 
     if "Records" in body:
         for record in body["Records"]:
             bucket = record["s3"]["bucket"]["name"]
             key = unquote_plus(record["s3"]["object"]["key"])
+            logger.info("Processing s3://%s/%s", bucket, key)
 
-            logger.info(f"Processing s3://{bucket}/{key}")
-            process_file(bucket, key)
+            try:
+                process_file(bucket, key)
+            except Exception as e:
+                # SQS visibility timeout will expire,
+                # and the message will be retried or sent to DLQ.
+                logger.error("Failed to process s3://%s/%s: %s",
+                             bucket, key, e, exc_info=True)
+                return
 
     sqs_client.delete_message(
         QueueUrl=SQS_QUEUE_URL,
         ReceiptHandle=message["ReceiptHandle"]
     )
+    logger.info("Successfully processed and deleted message from queue.")
 
 def poll_queue():
-    logger.info(f"Worker started. Listening on: {SQS_QUEUE_URL}")
-
-    # Signal to the ECS health check that the worker is ready
+    logger.info("Worker started. Listening on: %s", SQS_QUEUE_URL)
     try:
         with open(HEALTH_FILE, "w") as f:
             f.write("ready")
-        logger.info(f"Health sentinel written to {HEALTH_FILE}")
+        logger.info("Health sentinel written to %s", HEALTH_FILE)
     except OSError as e:
-        logger.warning(f"Could not write health sentinel: {e}")
+        logger.warning("Could not write health sentinel: %s", e)
 
     while True:
         try:
@@ -112,7 +117,7 @@ def poll_queue():
             for message in response.get("Messages", []):
                 process_message(message)
         except Exception as e:
-            logger.error(f"Worker execution failed: {e}", exc_info=True)
+            logger.error("Worker execution failed: %s", e, exc_info=True)
             time.sleep(5)
 
 if __name__ == "__main__":

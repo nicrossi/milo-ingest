@@ -13,7 +13,7 @@ class VectorStore:
     def __init__(self, db_url: str, min_conn: int = 1, max_conn: int = 10):
         self._pool = ThreadedConnectionPool(min_conn, max_conn, db_url)
         self.vector_dimension = int(os.getenv("VECTOR_DIMENSION", "384"))
-        logger.info(f"Initialized vector store with dimension: {self.vector_dimension}")
+        logger.info("Initialized vector store with dimension: %d", self.vector_dimension)
         self._init_schema()
 
     @contextmanager
@@ -26,14 +26,13 @@ class VectorStore:
             conn.commit()
         except Exception as e:
             conn.rollback()
-            logger.error("Database transaction failed: %s", e)
+            logger.error("Database transaction failed: %s", e, exc_info=True)
             raise
         finally:
             self._pool.putconn(conn)
 
     def _init_schema(self):
         """Ensures the pgvector extension and table exist."""
-        # We keep this here for self-contained worker resilience.
         ddl = f"""
         CREATE EXTENSION IF NOT EXISTS vector;
 
@@ -57,9 +56,9 @@ class VectorStore:
             return
 
         insert_query = """
-            INSERT INTO document_embeddings (source_file, chunk_index, chunk_text, embedding)
-            VALUES %s
-        """
+                       INSERT INTO document_embeddings (source_file, chunk_index, chunk_text, embedding)
+                       VALUES %s \
+                       """
 
         data = [
             (filename, i, chunk, embed)
