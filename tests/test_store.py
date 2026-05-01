@@ -32,15 +32,17 @@ def test_save_vectors_inserts_chunks_and_embeddings_into_database(mock_pool):
 
     chunks = ["text1", "text2"]
     vectors = [[0.1], [0.2]]
+    activity_id = "123e4567-e89b-12d3-a456-426614174000"
 
     # We need to patch execute_values because it's imported directly
     with patch("src.store.execute_values") as mock_exec_values:
-        store.save_vectors("test.pdf", chunks, vectors)
+        store.save_vectors("test.pdf", chunks, vectors, activity_id=activity_id)
 
         assert mock_exec_values.called
         args = mock_exec_values.call_args
         assert args[0][1].strip().startswith("INSERT INTO")
         assert len(args[0][2]) == 2  # 2 rows of data
+        assert args[0][2][0][1] == activity_id  # verify activity_id is in tuple
 
 def test_save_vectors_skips_database_insert_when_chunks_are_empty(mock_pool):
     """Test that save_vectors returns early without database call when given empty chunks."""

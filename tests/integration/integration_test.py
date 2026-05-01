@@ -86,6 +86,7 @@ def main():
     parser = DocumentParser()
     embedder = ContentEmbedder()
     store = VectorStore(DB_URL)
+    test_activity_id = "11111111-1111-1111-1111-111111111111"
 
     try:
         logger.info("Starting integration pipeline")
@@ -105,7 +106,7 @@ def main():
         logger.info("Generated %d vectors", len(vectors))
 
         # 4. Persist
-        store.save_vectors(str(TEST_FILE), chunks, vectors)
+        store.save_vectors(str(TEST_FILE), chunks, vectors, activity_id=test_activity_id)
         logger.info("Data persisted to database")
 
         # 5. Verify

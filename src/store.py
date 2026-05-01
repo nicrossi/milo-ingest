@@ -39,6 +39,7 @@ class VectorStore:
         CREATE TABLE IF NOT EXISTS document_embeddings (
             id SERIAL PRIMARY KEY,
             source_file TEXT NOT NULL,
+            activity_id UUID,
             chunk_index INT NOT NULL,
             chunk_text TEXT NOT NULL,
             embedding vector({self.vector_dimension}),
@@ -50,18 +51,24 @@ class VectorStore:
         """
         with self.get_cursor() as cur:
             cur.execute(ddl)
+            
+            # ensure activity_id exists if the table was created before this update
+            try:
+                cur.execute("ALTER TABLE document_embeddings ADD COLUMN IF NOT EXISTS activity_id UUID;")
+            except Exception as e:
+                logger.warning("Could not add activity_id column (it might already exist): %s", e)
 
-    def save_vectors(self, filename: str, chunks: List[str], embeddings: List[List[float]]):
+    def save_vectors(self, filename: str, chunks: List[str], embeddings: List[List[float]], activity_id: str | None = None):
         if not chunks:
             return
 
         insert_query = """
-                       INSERT INTO document_embeddings (source_file, chunk_index, chunk_text, embedding)
+                       INSERT INTO document_embeddings (source_file, activity_id, chunk_index, chunk_text, embedding)
                        VALUES %s \
                        """
 
         data = [
-            (filename, i, chunk, embed)
+            (filename, activity_id, i, chunk, embed)
             for i, (chunk, embed) in enumerate(zip(chunks, embeddings))
         ]
 

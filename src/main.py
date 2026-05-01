@@ -59,6 +59,11 @@ def process_file(bucket: str, object_key: str):
     local_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
+        # Fetch S3 object metadata
+        head_response = s3_client.head_object(Bucket=bucket, Key=object_key)
+        metadata = head_response.get('Metadata', {})
+        activity_id = metadata.get('activity_id') or metadata.get('activity-id')
+
         s3_client.download_file(bucket, object_key, str(local_path))
         markdown = doc_parser.parse_to_markdown(local_path)
         chunks = embedder.chunk_text(markdown)
@@ -68,7 +73,7 @@ def process_file(bucket: str, object_key: str):
             return
 
         vectors = embedder.embed_chunks(chunks)
-        vector_store.save_vectors(object_key, chunks, vectors)
+        vector_store.save_vectors(object_key, chunks, vectors, activity_id=activity_id)
     finally:
         if local_path.exists():
             local_path.unlink()

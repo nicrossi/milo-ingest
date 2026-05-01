@@ -139,8 +139,8 @@ In a **new terminal**, upload a test file to the S3 bucket:
 ```
 echo "Test ingestion data" > test-file.txt
 
-# Upload to S3 using awslocal
-awslocal s3 cp test-file.txt s3://milo-raw-ingest-local/uploads/test-file.txt
+# Upload to S3 using awslocal with metadata
+awslocal s3 cp test-file.txt s3://milo-raw-ingest-local/uploads/test-file.txt --metadata activity_id=faac041d-873e-4d58-bdf3-53a189a710e2
 ```
 
 **Expected output:**
@@ -321,6 +321,3 @@ docker-compose down -v
 # Remove downloaded test files
 rm -f tracemonkey.pdf
 ```
-
-
-

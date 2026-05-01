@@ -7,6 +7,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 CREATE TABLE IF NOT EXISTS document_embeddings (
     id SERIAL PRIMARY KEY,
     source_file TEXT NOT NULL,
+    activity_id UUID,
     chunk_index INT NOT NULL,
     chunk_text TEXT NOT NULL,
     embedding vector(384),

@@ -58,6 +58,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 CREATE TABLE IF NOT EXISTS document_embeddings (
     id SERIAL PRIMARY KEY,
     source_file TEXT NOT NULL,
+    activity_id UUID,
     chunk_index INT NOT NULL,
     chunk_text TEXT NOT NULL,
     embedding vector(384),  -- MUST match VECTOR_DIMENSION
@@ -78,10 +79,17 @@ CREATE INDEX IF NOT EXISTS idx_embedding ON document_embeddings
 2. Recreating with new dimension:
    ```sql
    CREATE TABLE document_embeddings (
-       ...
+       id SERIAL PRIMARY KEY,
+       source_file TEXT NOT NULL,
+       activity_id UUID,
+       chunk_index INT NOT NULL,
+       chunk_text TEXT NOT NULL,
        embedding vector(768),  -- New dimension
-       ...
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
    );
+
+   CREATE INDEX idx_embedding ON document_embeddings
+       USING hnsw (embedding vector_cosine_ops);
    ```
 
 3. Re-processing all ingested documents to generate new embeddings
@@ -129,6 +137,7 @@ DROP TABLE IF EXISTS document_embeddings;
 CREATE TABLE document_embeddings (
     id SERIAL PRIMARY KEY,
     source_file TEXT NOT NULL,
+    activity_id UUID,
     chunk_index INT NOT NULL,
     chunk_text TEXT NOT NULL,
     embedding vector(768),  -- New dimension
