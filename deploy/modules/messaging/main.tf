@@ -35,13 +35,13 @@ resource "aws_sqs_queue_policy" "this" {
   })
 }
 
-# Trigger: S3 ObjectCreated
+# Trigger: S3 ObjectCreated and ObjectRemoved
 resource "aws_s3_bucket_notification" "this" {
   bucket = var.bucket_id
 
   queue {
     queue_arn     = aws_sqs_queue.this.arn
-    events        = ["s3:ObjectCreated:*"]
+    events        = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
   }
 
   depends_on = [aws_sqs_queue_policy.this]

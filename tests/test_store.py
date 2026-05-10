@@ -51,3 +51,21 @@ def test_save_vectors_skips_database_insert_when_chunks_are_empty(mock_pool):
     with patch("src.store.execute_values") as mock_exec_values:
         store.save_vectors("test.pdf", [], [])
         assert not mock_exec_values.called
+
+def test_delete_vectors_executes_delete_with_source_file_filter(mock_pool):
+    """Verify delete_vectors issues DELETE filtered by source_file and returns rowcount."""
+    store = VectorStore("postgres://fake:url")
+
+    mock_conn = mock_pool.getconn.return_value
+    mock_cursor = mock_conn.cursor.return_value.__enter__.return_value
+    mock_cursor.rowcount = 5
+    mock_cursor.execute.reset_mock()
+
+    deleted = store.delete_vectors("test.pdf")
+
+    assert deleted == 5
+    mock_cursor.execute.assert_called_once()
+    sql, params = mock_cursor.execute.call_args[0]
+    assert "DELETE FROM document_embeddings" in sql
+    assert "source_file = %s" in sql
+    assert params == ("test.pdf",)

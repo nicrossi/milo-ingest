@@ -16,3 +16,5 @@ CREATE TABLE IF NOT EXISTS document_embeddings (
 
 CREATE INDEX IF NOT EXISTS idx_embedding ON document_embeddings
     USING hnsw (embedding vector_cosine_ops);
+
+CREATE INDEX IF NOT EXISTS idx_source_file ON document_embeddings (source_file);

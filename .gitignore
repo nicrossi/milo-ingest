@@ -1,5 +1,6 @@
 .terraform/
-
+.claude/
+tests/__pycache__/
 *.tfstate
 *.tfstate.*
 .terraform.tfstate.lock.info

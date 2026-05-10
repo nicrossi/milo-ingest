@@ -78,22 +78,34 @@ def process_file(bucket: str, object_key: str):
         if local_path.exists():
             local_path.unlink()
 
+def delete_file(object_key: str):
+    vector_store.delete_vectors(object_key)
+
 def process_message(message: dict):
     body = json.loads(message["Body"])
 
     if "Records" in body:
         for record in body["Records"]:
+            event_name = record.get("eventName", "")
             bucket = record["s3"]["bucket"]["name"]
             key = unquote_plus(record["s3"]["object"]["key"])
-            logger.info("Processing s3://%s/%s", bucket, key)
 
             try:
-                process_file(bucket, key)
+                if event_name.startswith("ObjectCreated"):
+                    logger.info("Processing s3://%s/%s", bucket, key)
+                    process_file(bucket, key)
+                elif event_name.startswith("ObjectRemoved"):
+                    logger.info("Deleting embeddings for s3://%s/%s", bucket, key)
+                    delete_file(key)
+                else:
+                    logger.warning("Unhandled eventName=%s for s3://%s/%s",
+                                   event_name, bucket, key)
+                    continue
             except Exception as e:
                 # SQS visibility timeout will expire,
                 # and the message will be retried or sent to DLQ.
-                logger.error("Failed to process s3://%s/%s: %s",
-                             bucket, key, e, exc_info=True)
+                logger.error("Failed %s for s3://%s/%s: %s",
+                             event_name, bucket, key, e, exc_info=True)
                 return
 
     sqs_client.delete_message(

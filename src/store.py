@@ -48,6 +48,8 @@ class VectorStore:
 
         CREATE INDEX IF NOT EXISTS idx_embedding ON document_embeddings
         USING hnsw (embedding vector_cosine_ops);
+
+        CREATE INDEX IF NOT EXISTS idx_source_file ON document_embeddings (source_file);
         """
         with self.get_cursor() as cur:
             cur.execute(ddl)
@@ -76,6 +78,17 @@ class VectorStore:
             execute_values(cur, insert_query, data)
 
         logger.info("Saved %d vectors for %s", len(data), filename)
+
+    def delete_vectors(self, filename: str) -> int:
+        with self.get_cursor() as cur:
+            cur.execute(
+                "DELETE FROM document_embeddings WHERE source_file = %s",
+                (filename,)
+            )
+            deleted = cur.rowcount
+
+        logger.info("Deleted %d vectors for %s", deleted, filename)
+        return deleted
 
     def close(self):
         """Cleanly close all connections in the pool."""
